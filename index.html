@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="id">
+<head>
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width,initial-scale=1" />
+	<title>Surat Ulang Tahun</title>
+	<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+	<style>
+		:root{
+			--bg-1:#ffeef6; /* soft pink */
+			--bg-2:#ffd7e8;
+			--card:#fff6fb;
+			--accent:#ff9cc9;
+			--text:#4b2a3a;
+			--muted:#7a5266;
+			--radius:18px;
+		}
+		*{box-sizing:border-box}
+		html,body{height:100%}
+		body{
+			margin:0;
+			font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;
+			background:linear-gradient(135deg,var(--bg-1),var(--bg-2));
+			color:var(--text);
+			-webkit-font-smoothing:antialiased;
+			-moz-osx-font-smoothing:grayscale;
+			display:flex;align-items:center;justify-content:center;padding:24px;
+		}
+		.stage{width:100%;max-width:860px}
+
+		/* Envelope */
+		.envelope{position:relative;width:100%;height:auto;perspective:1200px}
+		.envelope .body{background:var(--card);border-radius:12px;padding:20px 18px;box-shadow:0 8px 30px rgba(90,40,60,0.12);overflow:hidden}
+		/* flap closed by default; will rotate when .open added */
+		.flap{position:absolute;left:6%;right:6%;top:-6%;height:60%;background:linear-gradient(180deg,var(--accent),#ffd6ec);border-radius:12px;transform-origin:center top;transform:rotateX(0);transition:transform 900ms cubic-bezier(.2,.9,.25,1);box-shadow:0 12px 30px rgba(100,40,80,0.12)}
+		.envelope.open .flap{transform:rotateX(-180deg)}
+		/* pin (heart) centered on flap */
+		.pin{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:64px;height:64px;border-radius:50%;border:none;background:radial-gradient(circle at 30% 30%,#fff6fb,#ffd7e8);color:#9b2b4a;font-size:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 18px rgba(90,30,60,0.18);z-index:20;transition:transform 320ms ease,opacity 320ms ease}
+		.pin:active{transform:translate(-50%,-50%) scale(.96)}
+		.envelope.open .pin{transform:translate(-50%,-160%) scale(.6);opacity:0}
+		/* letter hidden until envelope is opened */
+		.letter{max-width:720px;margin:36px auto 8px;opacity:0;transform:translateY(14px);transition:opacity 420ms ease,transform 420ms ease;}
+		.envelope.open .letter{opacity:1;transform:translateY(0)}
+		.letter h1{margin:0;font-size:1.6rem;color:var(--text);letter-spacing:0.2px}
+		.date{font-size:0.85rem;color:var(--muted);margin-top:6px}
+		.letter p{line-height:1.55;color:var(--text);margin:14px 0}
+
+		/* Flip card */
+		.flip-card{width:100%;max-width:360px;margin:16px auto;border-radius:12px}
+		.flip-inner{position:relative;width:100%;padding-top:66%;transform-style:preserve-3d;transition:transform 700ms cubic-bezier(.2,.9,.25,1)}
+		.flip-card.flipped .flip-inner{transform:rotateY(180deg)}
+		.flip-front,.flip-back{position:absolute;inset:0;border-radius:12px;backface-visibility:hidden;overflow:hidden;box-shadow:0 8px 24px rgba(60,20,50,0.08)}
+		.flip-front{background:linear-gradient(180deg,#fff,#fff6fb);display:flex;align-items:center;justify-content:center}
+		.flip-front img{width:100%;height:100%;object-fit:cover;display:block}
+		.flip-back{background:linear-gradient(180deg,#fff0f6,#ffeaf6);transform:rotateY(180deg);display:flex;align-items:center;justify-content:center;padding:18px}
+		.back-text{color:var(--text);font-weight:500;text-align:center}
+
+		.controls{display:flex;gap:8px;justify-content:center;margin-top:12px}
+		.btn{background:var(--accent);border:none;color:#3a1028;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
+		.btn.secondary{background:transparent;border:1px solid rgba(75,42,58,0.08)}
+
+		/* photo input overlay */
+		/* photo-controls removed per user request */
+
+		/* Responsive */
+		@media (max-width:640px){
+			body{padding:14px}
+			.stage{max-width:520px}
+			.letter h1{font-size:1.25rem}
+			.letter p{font-size:0.95rem}
+			.flip-card{max-width:300px}
+			/* reduce flap overlap so title stays visible */
+			.flap{left:6%;right:6%;top:-4%;height:42%}
+			.envelope .body{padding:16px}
+			.pin{width:54px;height:54px;font-size:24px}
+			.controls{gap:6px;padding-top:10px}
+			.controls .btn{padding:9px 10px;font-size:0.95rem}
+		}
+		@media (max-width:420px){
+			body{padding:12px}
+			.stage{max-width:380px}
+			.letter{margin:18px 6px}
+			.letter h1{font-size:1.05rem}
+			.letter p{font-size:0.92rem}
+			.flip-card{max-width:260px}
+			/* further reduce flap size for very small screens */
+			.flap{left:6%;right:6%;top:-3%;height:38%}
+			.pin{width:48px;height:48px;font-size:20px}
+			.envelope .body{padding:12px}
+			/* make controls wrap and more touch friendly */
+			.controls{display:flex;flex-wrap:wrap;gap:8px}
+			.controls .btn{flex:1 1 48%;min-width:120px;padding:10px;font-size:0.95rem}
+			.controls .btn.secondary{flex-basis:48%}
+		}
+		@media (min-width:900px){
+			.envelope{transform:scale(1)}
+		}
+
+		/* small accessibility focus */
+		.flip-card:focus{outline:3px solid rgba(255,156,201,0.35);outline-offset:6px}
+	</style>
+</head>
+<body>
+	<div class="stage">
+		<div class="envelope" id="envelope">
+				<div class="flap" aria-hidden="true">
+					<button id="pin" class="pin" aria-label="Buka amplop" aria-pressed="false" title="Buka amplop">❤</button>
+				</div>
+			<div class="body" role="article" aria-label="Surat ulang tahun">
+				<div class="letter" id="letter">
+					<h1>Untuk Pacarku, Namira Nur Rabi'a</h1>
+					<div class="date">Hari Spesialmu — 24 November 2025</div>
+					<p>Selamat Ulang tahun untuk wanitaku yang paling cantik, paling lucu, paling imut, paling gemesin di dunia ini. Ngga kerasa yaa, kamu udah 19 tahun, semoga di umur kamu yang bertambah ini, kamu menjadi pribadi yang lebih baik, lebih pintar, lebih nurut ke orang tua. Selain itu, kamu harus ingat bahwa ada aku disamping kamu untuk mendukung kamu apapun itu kondisinya. Semoga juga, di umur kamu yang baru ini, segala doa doa mu dikabulkan oleh Allah SWT. Aamiin.</p>
+
+					<div class="flip-card" id="flipCard" tabindex="0" aria-label="Foto yang bisa diputar">
+						<div class="flip-inner">
+							<div class="flip-front" aria-hidden="false">
+								<img id="photo" src="sample-photo.jpeg" alt="Foto contoh pasangan">
+							</div>
+							<div class="flip-back">
+								<div class="back-text" id="backText">Di balik tulisan ini, ada wanita paling cantik yang pernah aku miliki, sehat selalu untuk wanita kuatku ini, semoga tuhan selalu melindungimu aamiin.</div>
+							</div>
+						</div>
+					</div>
+
+					<p>Terimakasih atas kehadiran kamu di hidupku. Semua berharga, terimakasih juga karna tetap bertahan sama aku. <br><strong>I Love You And I Always Do.</strong></p>
+				</div>
+			</div>
+		</div>
+
+		<div class="controls">
+			<button class="btn" id="openBtn">Buka Amplop</button>
+			<button class="btn secondary" id="flipBtn">Putar Foto</button>
+			<button class="btn" id="bgPlay">Mainkan Musik</button>
+			<button class="btn secondary" id="bgMute">Mute</button>
+		</div>
+
+		<!-- background audio (replace sample-audio.mp3 with your own file) -->
+		<!-- set autoplay and muted so browsers allow initial playback; will unmute on user interaction -->
+		<audio id="bgAudio" src="sample-audio.mp3" loop preload="auto" autoplay muted></audio>
+	</div>
+
+	<script>
+		(function(){
+			const envelope = document.getElementById('envelope');
+			const openBtn = document.getElementById('openBtn');
+			const flipBtn = document.getElementById('flipBtn');
+			const flipCard = document.getElementById('flipCard');
+			const flipInner = flipCard.querySelector('.flip-inner');
+			const photo = document.getElementById('photo');
+			const pin = document.getElementById('pin');
+
+			// Open/close envelope state and toggler
+			let opened = false;
+			function toggleEnvelope(){
+				if(!opened){
+					envelope.classList.add('open');
+					opened = true;
+					openBtn.textContent = 'Amplop Terbuka';
+					if(pin) pin.setAttribute('aria-pressed','true');
+					// on open: try to unmute and fade in background audio (user interaction)
+					if(typeof bgAudio !== 'undefined' && bgAudio){
+						// ensure audio is playing
+						bgAudio.play().catch(()=>{});
+						// if currently muted, unmute with gentle fade
+						if(bgAudio.muted){
+							try{
+								bgAudio.muted = false;
+								bgAudio.volume = 0;
+								let vol = 0;
+								const fade = setInterval(()=>{
+									vol += 0.06;
+									if(vol >= 1){ bgAudio.volume = 1; clearInterval(fade); }
+									else { bgAudio.volume = Math.min(1, vol); }
+								}, 80);
+							} catch(e) { /* ignore */ }
+						}
+					}
+				} else {
+					envelope.classList.remove('open');
+					opened = false;
+					openBtn.textContent = 'Buka Amplop';
+					if(pin) pin.setAttribute('aria-pressed','false');
+				}
+			}
+
+			openBtn.addEventListener('click', toggleEnvelope);
+			if(pin){
+				pin.addEventListener('click',(e)=>{ e.stopPropagation(); toggleEnvelope(); });
+				pin.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggleEnvelope(); } });
+			}
+
+			// Flip photo
+			function toggleFlip(){ flipCard.classList.toggle('flipped'); }
+			flipBtn.addEventListener('click', toggleFlip);
+			flipCard.addEventListener('click', (e)=>{ // allow tap to flip
+				toggleFlip();
+			});
+
+			// Background audio controls
+			const bgAudio = document.getElementById('bgAudio');
+			const bgPlay = document.getElementById('bgPlay');
+			const bgMute = document.getElementById('bgMute');
+
+			function updateBgButtons(){
+				if(!bgAudio) return;
+				bgPlay.textContent = bgAudio.paused ? 'Mainkan Musik' : 'Jeda Musik';
+				bgMute.textContent = bgAudio.muted ? 'Unmute' : 'Mute';
+			}
+
+			if(bgPlay){
+				bgPlay.addEventListener('click', async ()=>{
+					if(!bgAudio) return;
+					try{
+						if(bgAudio.paused){
+							await bgAudio.play();
+						} else {
+							bgAudio.pause();
+						}
+					} catch(err){
+						alert('Tidak dapat memutar audio. Silakan pastikan file "sample-audio.mp3" ada atau ganti dengan file audio Anda.');
+					}
+					updateBgButtons();
+				});
+			}
+
+			if(bgMute){
+				bgMute.addEventListener('click', ()=>{
+					if(!bgAudio) return;
+					bgAudio.muted = !bgAudio.muted;
+					updateBgButtons();
+				});
+			}
+
+			// update button states when audio changes
+			if(bgAudio){
+				bgAudio.addEventListener('play', updateBgButtons);
+				bgAudio.addEventListener('pause', updateBgButtons);
+				bgAudio.addEventListener('volumechange', updateBgButtons);
+				updateBgButtons();
+				// try to start playback (muted autoplay allowed); then attempt unmuted play (may be blocked)
+				bgAudio.play().catch(()=>{});
+			}
+			flipCard.addEventListener('keydown',(e)=>{ if(e.key==='Enter' || e.key===' ') { e.preventDefault(); toggleFlip(); } });
+
+			// Prevent accidental image drag
+			photo.addEventListener('dragstart', (e)=>e.preventDefault());
+		})();
+	</script>
+</body>
+</html>
+
